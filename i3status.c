@@ -2,8 +2,6 @@
 #include <time.h>
 #include <signal.h>
 #include <alsa/asoundlib.h>
-#include <mpd/playlist.h>
-#include <mpd/song.h>
 #include <mpd/client.h>
 #include <libnotify/notify.h>
 
