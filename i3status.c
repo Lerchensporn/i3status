@@ -14,13 +14,13 @@
 
 static int is_battery_ok = 1;
 
-static void escape_quotes(char *str) {
+static void escape_quotes_nl(char *str) {
     int i, k;
     char *tmp;
 
     tmp = strdup(str);
     for (i = 0, k = 0; str[i]; ++i) {
-        if (str[i] != '"') {
+        if (str[i] != '"' && str[i] != '\n') {
             tmp[k++] = str[i];
         }
     }
@@ -57,7 +57,7 @@ static void print_date() {
 static void print_battery() {
     FILE *fp;
     int percentage, online;
-    char batbuf[2];
+    char batbuf[3];
 
     fp = fopen("/sys/class/power_supply/ADP1/online", "r");
     fread(batbuf, 1, sizeof batbuf, fp);
@@ -72,6 +72,7 @@ static void print_battery() {
     fclose(fp);
 
     percentage = atoi(batbuf);
+    snprintf(batbuf, sizeof batbuf, "%d", percentage);
 
     if (online) {
         print_icon("ac1", COLOR_DEFAULT, 0);
@@ -107,7 +108,7 @@ static void print_mpd() {
     struct mpd_song *song;
     struct mpd_status *status;
 
-    conn = mpd_connection_new(NULL, 0, 0);
+    conn = mpd_connection_new(NULL, 0, 200);
     if (! conn) {
         return;
     }
@@ -116,7 +117,7 @@ static void print_mpd() {
     status = mpd_run_status(conn);
     snprintf(title, sizeof title, "%s - %s", mpd_song_get_tag(song, MPD_TAG_ARTIST, 0),
         mpd_song_get_tag(song, MPD_TAG_TITLE, 0));
-    escape_quotes(title);
+    escape_quotes_nl(title);
 
     switch (mpd_status_get_state(status)) {
     case MPD_STATE_PLAY:
@@ -141,24 +142,24 @@ static void print_alsa() {
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
     long min, max, volume;
-    int muted;
+    int unmuted;
     char volbuf[8];
 
     snd_mixer_open(&handle, 0);
     snd_mixer_attach(handle, "default");
     snd_mixer_selem_register(handle, NULL, NULL);
-    snd_mixer_load(handle);    
+    snd_mixer_load(handle);
     snd_mixer_selem_id_alloca(&sid);
     snd_mixer_selem_id_set_index(sid, 0);
     snd_mixer_selem_id_set_name(sid, "Master");
     elem = snd_mixer_find_selem(handle, sid);
     snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
     snd_mixer_selem_get_playback_volume(elem, 0, &volume);
-    snd_mixer_selem_get_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &muted);
+    snd_mixer_selem_get_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &unmuted);
     snd_mixer_close(handle);
 
     volume = 100 * (volume - min) / (max - min);
-    print_icon(muted ? "vol3" : "vol1", COLOR_DEFAULT, 0);
+    print_icon(unmuted ? "vol1" : "vol2", COLOR_DEFAULT, 0);
     snprintf(volbuf, sizeof volbuf, "%d", volume);
     print_text(volbuf, COLOR_DEFAULT, 0);
 }
