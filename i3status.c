@@ -114,7 +114,18 @@ static void print_mpd() {
     }
 
     song = mpd_run_current_song(conn);
+    if (! song) {
+        mpd_connection_free(conn);
+        return;
+    }
+
     status = mpd_run_status(conn);
+    if (! status) {
+        mpd_connection_free(conn);
+        mpd_song_free(song);
+        return;
+    }
+
     snprintf(title, sizeof title, "%s - %s", mpd_song_get_tag(song, MPD_TAG_ARTIST, 0),
         mpd_song_get_tag(song, MPD_TAG_TITLE, 0));
     escape_quotes_nl(title);
