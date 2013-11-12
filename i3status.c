@@ -159,7 +159,7 @@ static void print_alsa() {
     snd_mixer_close(handle);
 
     volume = 100 * (volume - min) / (max - min);
-    print_icon(unmuted ? "vol1" : "vol2", COLOR_DEFAULT, 0);
+    print_icon(unmuted ? "vol1" : "vol3", COLOR_DEFAULT, 0);
     snprintf(volbuf, sizeof volbuf, "%d", volume);
     print_text(volbuf, COLOR_DEFAULT, 0);
 }
