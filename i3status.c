@@ -57,7 +57,7 @@ static void print_date() {
 static void print_battery() {
     FILE *fp;
     int percentage, online;
-    char batbuf[3];
+    char batbuf[4];
 
     fp = fopen("/sys/class/power_supply/ADP1/online", "r");
     fread(batbuf, 1, sizeof batbuf, fp);
