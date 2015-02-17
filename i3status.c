@@ -12,8 +12,6 @@
 #define BATLOW 5
 #define BATFULL 50
 
-static int is_battery_ok = 1;
-
 static void escape_quotes_nl(char *str)
 {
     int i, k;
@@ -74,6 +72,7 @@ static void print_date()
 
 static void print_battery()
 {
+    static int is_battery_ok = 1;
     FILE *fp;
     int percentage, online;
     char batbuf[4];
@@ -85,9 +84,7 @@ static void print_battery()
     fread(batbuf, 1, sizeof batbuf, fp);
     fclose(fp);
 
-    if (batbuf[0] == '1') {
-        online = 1;
-    }
+    online = (batbuf[0] == '1');
 
     fp = fopen("/sys/class/power_supply/BAT0/capacity", "r");
     if (!fp) {
